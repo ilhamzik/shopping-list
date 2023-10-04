@@ -146,6 +146,7 @@
         document.getElementById("product_table").innerHTML = htmlString
     }
     refreshProducts()
+    
     function addProduct() {
         fetch("{% url 'main:add_product_ajax' %}", {
             method: "POST",
@@ -157,5 +158,24 @@
     }
     document.getElementById("button_add").onclick = addProduct
 
+    function addProduct() {
+        fetch("{% url 'main:add_product_ajax' %}", {
+            method: "POST",
+            body: new FormData(document.querySelector('#form'))
+        }).then(refreshProducts)
+
+        document.getElementById("form").reset()
+        return false
+    }
+
+    document.getElementById("button_add").onclick = addProduct
+
+    function editProduct(pk) {
+        window.location.href = `/edit-product/${pk}`; 
+    }
+
+    function deleteProduct(pk) {
+        window.location.href = `/delete/${pk}`;  
+    }
 </script>
 {% endblock content %}
