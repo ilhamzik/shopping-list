@@ -60,42 +60,18 @@
     <h5>Class:</h5>
     <p>{{class}}</p>
     <table id="product_table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Description</th>
-                <th>Date Added</th>
-                <th> </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.price }}</td>
-                    <td>{{ product.description }}</td>
-                    <td>{{ product.date_added }}</td>
-                    <td>
-                        <a href="{% url 'main:edit_product' product.pk %}" class="btn btn-primary btn-sm">Edit</a>
-                        <a href="{% url 'main:delete_product' product.pk %}" class="btn btn-sm">Delete</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
+
+
     </table>
-    
     
     <br />
     
     <a href="{% url 'main:create_product' %}">
         <button>
             Add New Product
+            </a>
         </button>
     </a>
-    
-    <h5>Sesi terakhir login: {{ last_login }}</h5>
-
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -127,44 +103,59 @@
             </div>
         </div>
     </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Product by AJAX</button>
+    <a href="{% url 'main:logout' %}">
+        <button>
+            Logout
+        </button>
+    </a>
+    <h5>Sesi terakhir login: {{ last_login }}</h5>
+    
 
-    <script>
-        async function getProducts() {
-            return fetch("{% url 'main:get_product_json' %}").then((res) => res.json())
-        }
-
-        async function refreshProducts() {
-            document.getElementById("product_table").innerHTML = ""
-            const products = await getProducts()
-            let htmlString = `<tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Description</th>
-                <th>Date Added</th>
+<script>
+    async function getProducts() {
+        return fetch("{% url 'main:get_product_json' %}").then((res) => res.json())
+    }
+    async function refreshProducts() {
+        document.getElementById("product_table").innerHTML = ""
+        const products = await getProducts()
+        let htmlString = `<tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Date Added</th>
+            <th>Edit</th>
+            <th>Delete</th>
             </tr>`
             products.forEach((item) => {
-                htmlString += `\n<tr>
-                <td>${item.fields.name}</td>
-                <td>${item.fields.price}</td>
-                <td>${item.fields.description}</td>
-                <td>${item.fields.date_added}</td>
-            </tr>` 
-            })
-            
-            document.getElementById("product_table").innerHTML = htmlString
-        }
+                htmlString += `
+                <tr>
+                    <td>${item.fields.name}</td>
+                    <td>${item.fields.price}</td>
+                    <td>${item.fields.description}</td>
+                    <td>${item.fields.date_added}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="editProduct(${item.pk})">Edit</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteProduct(${item.pk})">Delete</button>
+                    </td>
+                </tr>`
+            });
+        
+        document.getElementById("product_table").innerHTML = htmlString
+    }
+    refreshProducts()
+    function addProduct() {
+        fetch("{% url 'main:add_product_ajax' %}", {
+            method: "POST",
+            body: new FormData(document.querySelector('#form'))
+        }).then(refreshProducts)
 
-        refreshProducts()
+        document.getElementById("form").reset()
+        return false
+    }
+    document.getElementById("button_add").onclick = addProduct
 
-        function addProduct() {
-            fetch("{% url 'main:add_product_ajax' %}", {
-                method: "POST",
-                body: new FormData(document.querySelector('#form'))
-            }).then(refreshProducts)
-
-            document.getElementById("form").reset()
-            return false
-        }
-        document.getElementById("button_add").onclick = addProduct
-    </script>
+</script>
 {% endblock content %}
